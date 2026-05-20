@@ -12,6 +12,7 @@ import {
   ChevronRight,
   LogOut,
   Layers,
+  TrendingUp,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -22,9 +23,10 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/exercises", label: "Exercises", icon: Dumbbell },
+  { href: "/programs", label: "Programs", icon: Layers },
+  { href: "/progression-rules", label: "Progression Rules", icon: TrendingUp },
   { href: "/users", label: "Users", icon: Users },
   { href: "/analytics", label: "Analytics", icon: BarChart2 },
-  { href: "/programs", label: "Programs", icon: Layers },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
