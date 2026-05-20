@@ -27,13 +27,14 @@ interface Props {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   rule: ProgressionRule | null;
-  onSave: (data: Omit<ProgressionRule, "id" | "deleted_at" | "created_at" | "updated_at">) => void;
+  onSave: (data: { name: string; type: ProgressionRule["type"]; config: Record<string, unknown> }) => void;
+  isSaving?: boolean;
 }
 
-export function ProgressionRuleFormDrawer({ open, onOpenChange, rule, onSave }: Props) {
+export function ProgressionRuleFormDrawer({ open, onOpenChange, rule, onSave, isSaving = false }: Props) {
   const isEdit = !!rule;
 
-  const { register, handleSubmit, reset, setValue, watch, formState: { errors, isSubmitting } } = useForm<ProgressionRuleInput>({
+  const { register, handleSubmit, reset, setValue, watch, formState: { errors } } = useForm<ProgressionRuleInput>({
     resolver: zodResolver(progressionRuleSchema),
     defaultValues: { type: "double_progression", config: DEFAULT_CONFIGS.double_progression },
   });
@@ -58,7 +59,11 @@ export function ProgressionRuleFormDrawer({ open, onOpenChange, rule, onSave }: 
   }
 
   function onSubmit(data: ProgressionRuleInput) {
-    onSave({ name: data.name, type: data.type, config: JSON.parse(data.config) });
+    onSave({
+      name: data.name,
+      type: data.type,
+      config: JSON.parse(data.config) as Record<string, unknown>,
+    });
   }
 
   return (
@@ -110,9 +115,9 @@ export function ProgressionRuleFormDrawer({ open, onOpenChange, rule, onSave }: 
         </form>
 
         <SheetFooter className="border-t border-border">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>Cancel</Button>
-          <Button type="submit" form="pr-form" disabled={isSubmitting}>
-            {isSubmitting && <Loader2 className="size-4 animate-spin" />}
+          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={isSaving}>Cancel</Button>
+          <Button type="submit" form="pr-form" disabled={isSaving}>
+            {isSaving && <Loader2 className="size-4 animate-spin" />}
             {isEdit ? "Save changes" : "Create rule"}
           </Button>
         </SheetFooter>

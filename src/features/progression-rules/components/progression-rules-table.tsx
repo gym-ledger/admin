@@ -11,15 +11,20 @@ import {
 } from "@tanstack/react-table";
 import {
   ArrowUpDown, ArrowUp, ArrowDown, MoreHorizontal, Pencil,
-  Trash2, Plus, RefreshCw,
+  Trash2, Plus, RefreshCw, ChevronLeft, ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem,
   DropdownMenuSeparator, DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import {
+  useProgressionRules,
+  useCreateProgressionRule,
+  useUpdateProgressionRule,
+  useDeleteProgressionRule,
+} from "@/features/progression-rules/hooks/use-progression-rules";
 import { ProgressionRuleFormDrawer } from "./progression-rule-form-drawer";
 import { DeleteProgressionRuleDialog } from "./delete-progression-rule-dialog";
 import type { ProgressionRule } from "@/features/progression-rules/types";
@@ -42,59 +47,38 @@ function formatDate(iso: string) {
   });
 }
 
-const DUMMY_RULES: ProgressionRule[] = [
-  {
-    id: "1", name: "Linear Double Progression", type: "double_progression",
-    config: { min_reps: 8, max_reps: 12, load_increment: 2.5 },
-    deleted_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-  },
-  {
-    id: "2", name: "RIR Wave 3-2-1", type: "rir_cycling",
-    config: { week_1_rir: 3, week_2_rir: 2, week_3_rir: 1, deload_rir: 4 },
-    deleted_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-  },
-  {
-    id: "3", name: "5% Weekly Load Increase", type: "percentage_based",
-    config: { increment_percent: 5, apply_every_n_sessions: 1 },
-    deleted_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-  },
-];
-
 export function ProgressionRulesTable() {
+  const [page, setPage] = useState(1);
   const [sorting, setSorting] = useState<SortingState>([]);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [editRule, setEditRule] = useState<ProgressionRule | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteRule, setDeleteRule] = useState<ProgressionRule | null>(null);
-  const [rules, setRules] = useState<ProgressionRule[]>(DUMMY_RULES);
-  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const { data, isLoading, isFetching, refetch } = useProgressionRules({ page, limit: 20 });
+  const createMutation = useCreateProgressionRule();
+  const updateMutation = useUpdateProgressionRule();
+  const deleteMutation = useDeleteProgressionRule();
+
+  const rules = data?.data ?? [];
+  const meta = data?.meta;
 
   function openCreate() { setEditRule(null); setDrawerOpen(true); }
   function openEdit(r: ProgressionRule) { setEditRule(r); setDrawerOpen(true); }
   function openDelete(r: ProgressionRule) { setDeleteRule(r); setDeleteOpen(true); }
 
-  function handleSave(data: Omit<ProgressionRule, "id" | "deleted_at" | "created_at" | "updated_at">) {
+  async function handleSave(payload: { name: string; type: ProgressionRule["type"]; config: Record<string, unknown> }) {
     if (editRule) {
-      setRules((prev) => prev.map((r) => r.id === editRule.id ? { ...r, ...data, updated_at: new Date().toISOString() } : r));
+      await updateMutation.mutateAsync({ id: editRule.id, ...payload });
     } else {
-      setRules((prev) => [...prev, {
-        ...data, id: crypto.randomUUID(),
-        deleted_at: null, created_at: new Date().toISOString(), updated_at: new Date().toISOString(),
-      }]);
+      await createMutation.mutateAsync(payload);
     }
     setDrawerOpen(false);
   }
 
-  function handleDelete() {
-    if (deleteRule) {
-      setRules((prev) => prev.filter((r) => r.id !== deleteRule.id));
-    }
+  async function handleDelete() {
+    if (deleteRule) await deleteMutation.mutateAsync(deleteRule.id);
     setDeleteOpen(false);
-  }
-
-  function handleRefresh() {
-    setIsRefreshing(true);
-    setTimeout(() => setIsRefreshing(false), 600);
   }
 
   const columns = [
@@ -111,7 +95,7 @@ export function ProgressionRulesTable() {
       cell: ({ getValue }) => {
         const t = getValue();
         return (
-          <span className={cn("inline-flex items-center rounded border px-2 py-0.5 text-xs font-medium", TYPE_COLORS[t] ?? "bg-muted text-muted-foreground")}>
+          <span className={cn("inline-flex items-center rounded border px-2 py-0.5 text-xs font-medium", TYPE_COLORS[t] ?? "bg-muted text-muted-foreground border-border")}>
             {PROGRESSION_RULE_TYPE_LABELS[t]}
           </span>
         );
@@ -149,7 +133,10 @@ export function ProgressionRulesTable() {
               <Pencil className="size-4" /> Edit
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive focus:text-destructive" onClick={() => openDelete(row.original)}>
+            <DropdownMenuItem
+              className="text-destructive focus:text-destructive"
+              onClick={() => openDelete(row.original)}
+            >
               <Trash2 className="size-4" /> Delete
             </DropdownMenuItem>
           </DropdownMenuContent>
@@ -165,13 +152,20 @@ export function ProgressionRulesTable() {
     onSortingChange: setSorting,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
+    manualPagination: true,
   });
 
   return (
     <>
       <div className="flex items-center gap-2">
-        <Button variant="ghost" size="icon" onClick={handleRefresh} aria-label="Refresh">
-          <RefreshCw className={cn("size-4", isRefreshing && "animate-spin")} />
+        <Button
+          variant="ghost"
+          size="icon"
+          onClick={() => refetch()}
+          disabled={isFetching}
+          aria-label="Refresh"
+        >
+          <RefreshCw className={cn("size-4", isFetching && "animate-spin")} />
         </Button>
         <div className="ml-auto">
           <Button onClick={openCreate} size="sm">
@@ -195,8 +189,8 @@ export function ProgressionRulesTable() {
               ))}
             </thead>
             <tbody>
-              {isRefreshing ? (
-                Array.from({ length: 3 }).map((_, i) => (
+              {isLoading ? (
+                Array.from({ length: 5 }).map((_, i) => (
                   <tr key={i} className="border-b border-border last:border-0">
                     <td className="px-3 py-2.5" colSpan={columns.length}>
                       <Skeleton className="h-8 w-full" />
@@ -223,6 +217,32 @@ export function ProgressionRulesTable() {
             </tbody>
           </table>
         </div>
+
+        {meta && meta.totalPages > 1 && (
+          <div className="flex items-center justify-between border-t border-border px-3 py-2">
+            <span className="text-xs text-muted-foreground">
+              {meta.totalCount} rules · page {meta.page} of {meta.totalPages}
+            </span>
+            <div className="flex items-center gap-1">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => setPage((p) => Math.max(1, p - 1))}
+                disabled={page === 1 || isFetching}
+              >
+                <ChevronLeft className="size-3.5" />
+              </Button>
+              <Button
+                variant="outline"
+                size="icon-sm"
+                onClick={() => setPage((p) => Math.min(meta.totalPages, p + 1))}
+                disabled={page === meta.totalPages || isFetching}
+              >
+                <ChevronRight className="size-3.5" />
+              </Button>
+            </div>
+          </div>
+        )}
       </div>
 
       <ProgressionRuleFormDrawer
@@ -230,20 +250,29 @@ export function ProgressionRulesTable() {
         onOpenChange={setDrawerOpen}
         rule={editRule}
         onSave={handleSave}
+        isSaving={createMutation.isPending || updateMutation.isPending}
       />
       <DeleteProgressionRuleDialog
         open={deleteOpen}
         onOpenChange={setDeleteOpen}
         rule={deleteRule}
         onConfirm={handleDelete}
+        isDeleting={deleteMutation.isPending}
       />
     </>
   );
 }
 
-function SortHeader({ label, sorted, onClick }: { label: string; sorted: false | "asc" | "desc"; onClick?: (e: unknown) => void }) {
+function SortHeader({ label, sorted, onClick }: {
+  label: string;
+  sorted: false | "asc" | "desc";
+  onClick?: (e: unknown) => void;
+}) {
   return (
-    <button className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground" onClick={onClick}>
+    <button
+      className="inline-flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground"
+      onClick={onClick}
+    >
       {label}
       {sorted === false && <ArrowUpDown className="size-3" />}
       {sorted === "asc" && <ArrowUp className="size-3" />}

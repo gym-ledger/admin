@@ -13,7 +13,7 @@ import {
   type CreateExercisePayload,
   type UpdateExercisePayload,
 } from "@/features/exercises/services/exercises.service";
-import { ApiError } from "@/types/api";
+import { getErrorMessage } from "@/types/api";
 
 export const exerciseKeys = {
   all: ["exercises"] as const,
@@ -36,7 +36,7 @@ export function useCreateExercise() {
       toast.success("Exercise created");
     },
     onError: (err) => {
-      toast.error(err instanceof ApiError ? err.message : "Failed to create exercise");
+      toast.error(getErrorMessage(err));
     },
   });
 }
@@ -50,7 +50,7 @@ export function useUpdateExercise() {
       toast.success("Exercise updated");
     },
     onError: (err) => {
-      toast.error(err instanceof ApiError ? err.message : "Failed to update exercise");
+      toast.error(getErrorMessage(err));
     },
   });
 }
@@ -64,7 +64,7 @@ export function useDeleteExercise() {
       toast.success("Exercise deleted");
     },
     onError: (err) => {
-      toast.error(err instanceof ApiError ? err.message : "Failed to delete exercise");
+      toast.error(getErrorMessage(err));
     },
   });
 }

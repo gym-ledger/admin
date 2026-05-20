@@ -23,3 +23,9 @@ export class ApiError extends Error {
     this.name = "ApiError";
   }
 }
+
+export function getErrorMessage(err: unknown): string {
+  if (err instanceof ApiError) return err.message;
+  if (err instanceof Error && err.message) return err.message;
+  return "Something went wrong";
+}

@@ -32,13 +32,16 @@ async function request<T>(path: string, options: RequestInit = {}): Promise<T> {
   }
 
   const res = await fetch(`${API_BASE}${path}`, { ...options, headers });
-  const json = await res.json().catch(() => ({ message: "Unknown error" }));
 
-  if (!res.ok) {
-    throw new ApiError(res.status, (json as { message?: string }).message ?? "Request failed");
+  type ApiBody = { success?: boolean; data?: T; error?: { message?: string }; message?: string };
+  const body = await res.json().catch(() => null) as ApiBody | null;
+
+  if (!res.ok || body?.success === false) {
+    const message = body?.error?.message ?? body?.message ?? "Something went wrong";
+    throw new ApiError(res.status, message);
   }
 
-  return (json as { data: T }).data;
+  return body?.data as T;
 }
 
 export const apiClient = {
