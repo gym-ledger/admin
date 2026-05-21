@@ -44,7 +44,6 @@ export interface ProgramBuilderState {
   name: string;
   visibility: "public" | "private";
   description: string;
-  training_days: number;
   split_type: SplitType;
   session_ordering_logic: SessionOrderingLogic;
   duration_type: DurationType;
@@ -53,9 +52,43 @@ export interface ProgramBuilderState {
   days: ProgramBuilderDay[];
 }
 
+// Full program returned by the view API endpoint
+export interface ProgramWithDetails extends WorkoutProgram {
+  description: string;
+  split_type: SplitType;
+  session_ordering_logic: SessionOrderingLogic;
+  duration_type: DurationType;
+  duration_weeks: number;
+  version_visibility: "public" | "private";
+  program_days: {
+    dayNumber: number;
+    name: string;
+    visibility: "public" | "private";
+    sessions: {
+      id: string;
+      name: string;
+      visibility: "public" | "private";
+      exercises: {
+        id: string;
+        exercise_id: string;
+        exercise_name: string;
+        exercise_order: number;
+        target_sets: number;
+        min_reps: number;
+        max_reps: number;
+        target_rir: number | null;
+        rest_seconds: number | null;
+        tempo: string;
+        notes: string;
+        visibility: "public" | "private";
+      }[];
+    }[];
+  }[];
+}
+
 export const DAY_LABELS = ["MON", "TUE", "WED", "THU", "FRI", "SAT", "SUN"] as const;
 export const DAY_FULL_NAMES = [
-  "Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday",
+  "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
 ] as const;
 
 export const SPLIT_TYPE_LABELS: Record<SplitType, string> = {

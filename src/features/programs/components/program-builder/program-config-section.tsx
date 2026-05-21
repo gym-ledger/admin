@@ -7,8 +7,6 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { SPLIT_TYPE_LABELS, SESSION_ORDERING_LABELS } from "@/features/programs/types";
 
-const DAY_OPTIONS = [1, 2, 3, 4, 5, 6, 7];
-
 export function ProgramConfigSection() {
   const { state, dispatch } = useProgramBuilder();
 
@@ -60,26 +58,6 @@ export function ProgramConfigSection() {
 
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
-            <Label>Training Days / Week</Label>
-            <div className="flex gap-1">
-              {DAY_OPTIONS.map((d) => (
-                <button
-                  key={d}
-                  type="button"
-                  onClick={() => dispatch({ type: "SET_TRAINING_DAYS", value: d })}
-                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-md border text-xs font-semibold transition-colors ${
-                    state.training_days === d
-                      ? "border-indigo-600 bg-indigo-600 text-white"
-                      : "border-border bg-background text-muted-foreground hover:border-indigo-300 hover:text-foreground"
-                  }`}
-                >
-                  {d}
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-1.5">
             <Label>Split Type</Label>
             <Select value={state.split_type} onValueChange={(v) => dispatch({ type: "SET_SPLIT_TYPE", value: v as any })}>
               <SelectTrigger className="w-full">
@@ -92,9 +70,7 @@ export function ProgramConfigSection() {
               </SelectContent>
             </Select>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label>Session Ordering</Label>
             <Select value={state.session_ordering_logic} onValueChange={(v) => dispatch({ type: "SET_SESSION_ORDERING", value: v as any })}>
@@ -108,7 +84,9 @@ export function ProgramConfigSection() {
               </SelectContent>
             </Select>
           </div>
+        </div>
 
+        <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label>Duration</Label>
             <Select value={state.duration_type} onValueChange={(v) => dispatch({ type: "SET_DURATION_TYPE", value: v as any })}>
@@ -121,22 +99,21 @@ export function ProgramConfigSection() {
               </SelectContent>
             </Select>
           </div>
-        </div>
 
-        {state.duration_type === "finite" && (
-          <div className="flex flex-col gap-1.5">
-            <Label htmlFor="dur-weeks">Duration (weeks)</Label>
-            <Input
-              id="dur-weeks"
-              type="number"
-              min={1}
-              max={52}
-              className="w-32"
-              value={state.duration_weeks}
-              onChange={(e) => dispatch({ type: "SET_DURATION_WEEKS", value: Number(e.target.value) })}
-            />
-          </div>
-        )}
+          {state.duration_type === "finite" && (
+            <div className="flex flex-col gap-1.5">
+              <Label htmlFor="dur-weeks">Duration (weeks)</Label>
+              <Input
+                id="dur-weeks"
+                type="number"
+                min={1}
+                max={52}
+                value={state.duration_weeks}
+                onChange={(e) => dispatch({ type: "SET_DURATION_WEEKS", value: Number(e.target.value) })}
+              />
+            </div>
+          )}
+        </div>
 
         <div className="flex flex-col gap-1.5">
           <Label>Version Visibility</Label>

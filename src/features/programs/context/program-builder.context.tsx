@@ -29,20 +29,18 @@ export const INITIAL_STATE: ProgramBuilderState = {
   name: "",
   visibility: "public",
   description: "",
-  training_days: 3,
   split_type: "ppl",
   session_ordering_logic: "sequential",
   duration_type: "finite",
   duration_weeks: 8,
   version_visibility: "public",
-  days: makeDefaultDays(),
+  days: [],
 };
 
 type Action =
   | { type: "SET_NAME"; value: string }
   | { type: "SET_VISIBILITY"; value: "public" | "private" }
   | { type: "SET_DESCRIPTION"; value: string }
-  | { type: "SET_TRAINING_DAYS"; value: number }
   | { type: "SET_SPLIT_TYPE"; value: SplitType }
   | { type: "SET_SESSION_ORDERING"; value: SessionOrderingLogic }
   | { type: "SET_DURATION_TYPE"; value: DurationType }
@@ -62,7 +60,6 @@ function reducer(state: ProgramBuilderState, action: Action): ProgramBuilderStat
     case "SET_NAME": return { ...state, name: action.value };
     case "SET_VISIBILITY": return { ...state, visibility: action.value };
     case "SET_DESCRIPTION": return { ...state, description: action.value };
-    case "SET_TRAINING_DAYS": return { ...state, training_days: action.value };
     case "SET_SPLIT_TYPE": return { ...state, split_type: action.value };
     case "SET_SESSION_ORDERING": return { ...state, session_ordering_logic: action.value };
     case "SET_DURATION_TYPE": return { ...state, duration_type: action.value };
@@ -165,10 +162,16 @@ interface ProgramBuilderContextValue {
 
 const ProgramBuilderContext = createContext<ProgramBuilderContextValue | null>(null);
 
-export function ProgramBuilderProvider({ children }: { children: React.ReactNode }) {
-  const [state, dispatch] = useReducer(reducer, INITIAL_STATE, (s) => ({
+export function ProgramBuilderProvider({
+  children,
+  initialValues,
+}: {
+  children: React.ReactNode;
+  initialValues?: ProgramBuilderState;
+}) {
+  const [state, dispatch] = useReducer(reducer, initialValues ?? INITIAL_STATE, (s) => ({
     ...s,
-    days: makeDefaultDays(),
+    days: s.days.length > 0 ? s.days : makeDefaultDays(),
   }));
   return (
     <ProgramBuilderContext.Provider value={{ state, dispatch }}>

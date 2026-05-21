@@ -21,7 +21,7 @@ export function LoginForm() {
     register,
     handleSubmit,
     formState: { errors, isSubmitting },
-  } = useForm<LoginInput>({ resolver: zodResolver(loginSchema) });
+  } = useForm({ resolver: zodResolver(loginSchema) });
 
   async function onSubmit(data: LoginInput) {
     try {
@@ -62,6 +62,7 @@ export function LoginForm() {
                 id="email"
                 type="email"
                 placeholder="admin@example.com"
+                defaultValue="test@test.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
                 {...register("email")}
@@ -77,6 +78,7 @@ export function LoginForm() {
                 id="password"
                 type="password"
                 placeholder="••••••••"
+                defaultValue="test@test.com"
                 autoComplete="current-password"
                 aria-invalid={!!errors.password}
                 {...register("password")}

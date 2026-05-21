@@ -1,10 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { ChevronsUpDown, CheckIcon } from "lucide-react";
+import { ChevronsUpDown, Loader2 } from "lucide-react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,7 +14,6 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { Command, CommandInput, CommandList, CommandEmpty, CommandGroup, CommandItem } from "@/components/ui/command";
 import { useExercises } from "@/features/exercises/hooks/use-exercises";
 import type { ProgramBuilderExercise } from "@/features/programs/types";
-import { cn } from "@/lib/utils";
 
 function coerceInt(v: string, fallback: number) {
   const n = parseInt(v, 10);
@@ -50,8 +49,23 @@ interface Props {
 export function AddExerciseDialog({ open, onOpenChange, editExercise, onConfirm }: Props) {
   const [exercisePickerOpen, setExercisePickerOpen] = useState(false);
   const [selectedExerciseName, setSelectedExerciseName] = useState(editExercise?.exercise_name ?? "");
+  const [search, setSearch] = useState("");
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const { data: exercisesData } = useExercises({ limit: 100 });
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  // Reset search when picker closes
+  useEffect(() => {
+    if (!exercisePickerOpen) setSearch("");
+  }, [exercisePickerOpen]);
+
+  const { data: exercisesData, isLoading: exercisesLoading } = useExercises({
+    search: debouncedSearch || undefined,
+    limit: 20,
+  });
   const exercises = exercisesData?.data ?? [];
 
   const defaultValues: FormValues = editExercise
@@ -78,7 +92,7 @@ export function AddExerciseDialog({ open, onOpenChange, editExercise, onConfirm 
   function onSubmit(data: FormValues) {
     const minR = coerceInt(data.min_reps, 1);
     const maxR = coerceInt(data.max_reps, 1);
-    if (minR > maxR) return; // silent guard
+    if (minR > maxR) return;
     onConfirm({
       tempId: editExercise?.tempId ?? crypto.randomUUID(),
       exercise_id: data.exercise_id,
@@ -98,8 +112,17 @@ export function AddExerciseDialog({ open, onOpenChange, editExercise, onConfirm 
     onOpenChange(false);
   }
 
+  function handleDialogClose(v: boolean) {
+    onOpenChange(v);
+    if (!v) {
+      reset(defaultValues);
+      setSelectedExerciseName(editExercise?.exercise_name ?? "");
+      setSearch("");
+    }
+  }
+
   return (
-    <Dialog open={open} onOpenChange={(v) => { onOpenChange(v); if (!v) { reset(defaultValues); setSelectedExerciseName(editExercise?.exercise_name ?? ""); } }}>
+    <Dialog open={open} onOpenChange={handleDialogClose}>
       <DialogContent showCloseButton={false} className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>{editExercise ? "Edit exercise" : "Add exercise"}</DialogTitle>
@@ -118,30 +141,40 @@ export function AddExerciseDialog({ open, onOpenChange, editExercise, onConfirm 
                   className="w-full justify-between font-normal"
                   aria-invalid={!!errors.exercise_id}
                 >
-                  {selectedExerciseName || <span className="text-muted-foreground">Select exercise…</span>}
+                  {selectedExerciseName || <span className="text-muted-foreground">Search exercises…</span>}
                   <ChevronsUpDown className="size-4 opacity-50" />
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-72 p-0" align="start">
-                <Command>
-                  <CommandInput placeholder="Search exercises…" />
+                <Command shouldFilter={false}>
+                  <CommandInput
+                    placeholder="Type to search…"
+                    value={search}
+                    onValueChange={setSearch}
+                  />
                   <CommandList>
-                    {exercises.length === 0 ? (
-                      <CommandEmpty>No exercises found. Add exercises first.</CommandEmpty>
+                    {exercisesLoading ? (
+                      <div className="flex items-center justify-center gap-2 py-4 text-xs text-muted-foreground">
+                        <Loader2 className="size-3.5 animate-spin" />
+                        Searching…
+                      </div>
+                    ) : exercises.length === 0 ? (
+                      <CommandEmpty>
+                        {debouncedSearch ? `No exercises matching "${debouncedSearch}".` : "No exercises found."}
+                      </CommandEmpty>
                     ) : (
                       <CommandGroup>
                         {exercises.map((ex) => (
                           <CommandItem
                             key={ex.id}
-                            value={ex.name}
+                            value={ex.id}
+                            data-checked={selectedId === ex.id}
                             onSelect={() => {
                               setValue("exercise_id", ex.id, { shouldValidate: true });
                               setSelectedExerciseName(ex.name);
                               setExercisePickerOpen(false);
                             }}
-                            data-checked={selectedId === ex.id}
                           >
-                            <CheckIcon className={cn("size-4 shrink-0", selectedId === ex.id ? "opacity-100" : "opacity-0")} />
                             {ex.name}
                           </CommandItem>
                         ))}

@@ -15,8 +15,6 @@ export function DayTabs() {
   const { state, dispatch } = useProgramBuilder();
   const [addSessionDay, setAddSessionDay] = useState<number | null>(null);
 
-  const activeDays = state.days.slice(0, state.training_days);
-
   return (
     <div className="rounded-lg border border-border bg-white">
       <div className="border-b border-border px-5 py-3">
@@ -28,7 +26,7 @@ export function DayTabs() {
       <Tabs defaultValue="0" className="p-0">
         <div className="overflow-x-auto border-b border-border px-5 pt-3">
           <TabsList variant="line" className="gap-0">
-            {activeDays.map((_, i) => (
+            {state.days.map((_, i) => (
               <TabsTrigger key={i} value={String(i)} className="px-3 text-xs font-semibold">
                 {DAY_LABELS[i]}
               </TabsTrigger>
@@ -36,7 +34,7 @@ export function DayTabs() {
           </TabsList>
         </div>
 
-        {activeDays.map((day, dayIndex) => (
+        {state.days.map((day, dayIndex) => (
           <TabsContent key={dayIndex} value={String(dayIndex)} className="m-0 p-5">
             {/* Day name */}
             <div className="mb-4 flex items-center gap-3">
