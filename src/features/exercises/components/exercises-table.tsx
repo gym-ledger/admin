@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -92,9 +92,17 @@ export function ExercisesTable() {
     setDeleteOpen(true);
   }
 
+  useEffect(() => {
+    const id = setTimeout(() => {
+      setSearch(searchInput.trim());
+      setPage(1);
+    }, 400);
+    return () => clearTimeout(id);
+  }, [searchInput]);
+
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
-    setSearch(searchInput);
+    setSearch(searchInput.trim());
     setPage(1);
   }
 
