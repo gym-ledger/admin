@@ -18,6 +18,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { useAuthStore } from "@/stores/auth.store";
 import { useUiStore } from "@/stores/ui.store";
+import { performLogout } from "@/auth/tokenManager";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const NAV_ITEMS = [
@@ -32,7 +33,7 @@ const NAV_ITEMS = [
 
 export function Sidebar() {
   const pathname = usePathname();
-  const { admin, clearAuth } = useAuthStore();
+  const admin = useAuthStore((s) => s.admin);
   const { sidebarCollapsed: collapsed, setSidebarCollapsed } = useUiStore();
 
   return (
@@ -110,7 +111,7 @@ export function Sidebar() {
                   variant="ghost"
                   size="icon-sm"
                   className="text-muted-foreground"
-                  onClick={() => clearAuth()}
+                  onClick={() => performLogout()}
                 >
                   <LogOut className="size-3.5" />
                   <span className="sr-only">Sign out</span>

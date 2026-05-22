@@ -8,6 +8,7 @@ import { Loader2, Dumbbell } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/features/auth/schemas/login.schema";
 import { loginAdmin } from "@/features/auth/services/auth.service";
 import { useAuthStore } from "@/stores/auth.store";
+import { decodeJwtExpiry } from "@/auth/authConstants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,7 +16,7 @@ import { ApiError } from "@/types/api";
 
 export function LoginForm() {
   const router = useRouter();
-  const setAuth = useAuthStore((s) => s.setAuth);
+  const setTokens = useAuthStore((s) => s.setTokens);
 
   const {
     register,
@@ -26,7 +27,14 @@ export function LoginForm() {
   async function onSubmit(data: LoginInput) {
     try {
       const res = await loginAdmin(data);
-      setAuth(res.accessToken, res.admin);
+      setTokens(
+        {
+          accessToken: res.accessToken,
+          refreshToken: res.refreshToken,
+          accessTokenExpiresAt: decodeJwtExpiry(res.accessToken),
+        },
+        res.admin,
+      );
       router.push("/exercises");
     } catch (err) {
       const message =

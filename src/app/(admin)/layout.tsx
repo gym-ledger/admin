@@ -13,21 +13,22 @@ export default function AdminLayout({
   children: React.ReactNode;
 }) {
   const router = useRouter();
-  const { _hasHydrated, accessToken } = useAuthStore();
+  const _hasHydrated = useAuthStore((s) => s._hasHydrated);
+  const status = useAuthStore((s) => s.status);
   const { sidebarCollapsed } = useUiStore();
 
   useEffect(() => {
-    if (_hasHydrated && !accessToken) {
+    if (!_hasHydrated) return;
+    if (status === "unauthenticated") {
       router.replace("/login");
     }
-  }, [_hasHydrated, accessToken, router]);
+  }, [_hasHydrated, status, router]);
 
-  // Wait for localStorage to hydrate before making auth decisions
-  if (!_hasHydrated) {
+  if (!_hasHydrated || status === "loading") {
     return null;
   }
 
-  if (!accessToken) {
+  if (status === "unauthenticated") {
     return null;
   }
 

@@ -1,7 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 import type { AdminUser } from "@/stores/auth.store";
 
-interface LoginResponse {
+export interface LoginResponse {
   admin: AdminUser;
   accessToken: string;
   refreshToken: string;
