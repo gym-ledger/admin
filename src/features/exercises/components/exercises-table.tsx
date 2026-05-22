@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef } from "react";
 import {
   useReactTable,
   getCoreRowModel,
@@ -23,6 +23,8 @@ import {
   RefreshCw,
   Globe,
   Lock,
+  Download,
+  Upload,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -35,7 +37,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { useExercises } from "@/features/exercises/hooks/use-exercises";
+import { useExercises, useImportExercises, useExportExercises } from "@/features/exercises/hooks/use-exercises";
 import { ExerciseFormDrawer } from "@/features/exercises/components/exercise-form-drawer";
 import { DeleteExerciseDialog } from "@/features/exercises/components/delete-exercise-dialog";
 import type { Exercise } from "@/features/exercises/types";
@@ -61,6 +63,10 @@ export function ExercisesTable() {
   const [editExercise, setEditExercise] = useState<Exercise | null>(null);
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteExercise, setDeleteExercise] = useState<Exercise | null>(null);
+
+  const importFileRef = useRef<HTMLInputElement>(null);
+  const { mutate: runImport, isPending: isImporting } = useImportExercises();
+  const { mutate: runExport, isPending: isExporting } = useExportExercises();
 
   const { data, isLoading, isFetching, refetch } = useExercises({
     page,
@@ -232,7 +238,38 @@ export function ExercisesTable() {
         >
           <RefreshCw className={cn("size-4", isFetching && "animate-spin")} />
         </Button>
-        <div className="ml-auto">
+        <div className="ml-auto flex items-center gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => runExport()}
+            disabled={isExporting}
+          >
+            <RefreshCw className={cn("size-3.5", isExporting ? "animate-spin" : "hidden")} />
+            <Download className={cn("size-3.5", isExporting && "hidden")} />
+            Export CSV
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => importFileRef.current?.click()}
+            disabled={isImporting}
+          >
+            <RefreshCw className={cn("size-3.5", isImporting ? "animate-spin" : "hidden")} />
+            <Upload className={cn("size-3.5", isImporting && "hidden")} />
+            Import CSV
+          </Button>
+          <input
+            ref={importFileRef}
+            type="file"
+            accept=".csv"
+            className="hidden"
+            onChange={(e) => {
+              const file = e.target.files?.[0];
+              if (file) runImport(file);
+              e.target.value = "";
+            }}
+          />
           <Button onClick={openCreate} size="sm">
             <Plus className="size-4" />
             New exercise

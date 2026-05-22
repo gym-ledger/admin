@@ -2,6 +2,11 @@ import { apiClient } from "@/lib/api-client";
 import type { PaginatedData } from "@/types/api";
 import type { Exercise } from "@/features/exercises/types";
 
+export interface ImportResult {
+  success: unknown[];
+  errors: { row: number; message: string }[];
+}
+
 export interface ListExercisesParams {
   page?: number;
   limit?: number;
@@ -61,4 +66,40 @@ export async function updateExercise(
 
 export async function deleteExercise(id: string): Promise<Exercise> {
   return apiClient.delete<Exercise>(`/admin/crud/exercises/delete/${id}`);
+}
+
+export async function importExercises(file: File): Promise<ImportResult> {
+  const form = new FormData();
+  form.append("file", file);
+  return apiClient.post<ImportResult>("/admin/crud/exercises/import", form);
+}
+
+const CSV_COLUMNS: (keyof Exercise)[] = ["name", "slug", "description", "visibility"];
+
+function toCSV(rows: Exercise[]): string {
+  const escape = (v: unknown) => {
+    const s = v == null ? "" : String(v);
+    return s.includes(",") || s.includes('"') || s.includes("\n")
+      ? `"${s.replace(/"/g, '""')}"`
+      : s;
+  };
+  const lines = [
+    CSV_COLUMNS.join(","),
+    ...rows.map((r) => CSV_COLUMNS.map((col) => escape(r[col])).join(",")),
+  ];
+  return lines.join("\n");
+}
+
+export async function exportExercises(): Promise<void> {
+  const exercises = await apiClient.get<Exercise[]>("/admin/crud/exercises/export");
+  const csv = toCSV(exercises);
+  const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url;
+  a.download = `exercises-${new Date().toISOString().slice(0, 10)}.csv`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
