@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import { Plus } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
@@ -8,12 +7,10 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useProgramBuilder } from "@/features/programs/context/program-builder.context";
 import { SessionCard } from "./session-card";
-import { AddSessionDialog } from "./add-session-dialog";
 import { DAY_LABELS, DAY_FULL_NAMES } from "@/features/programs/types";
 
 export function DayTabs() {
   const { state, dispatch } = useProgramBuilder();
-  const [addSessionDay, setAddSessionDay] = useState<number | null>(null);
 
   return (
     <div className="rounded-lg border border-border bg-white">
@@ -72,7 +69,7 @@ export function DayTabs() {
                   variant="outline"
                   size="sm"
                   className="border-dashed text-muted-foreground"
-                  onClick={() => setAddSessionDay(dayIndex)}
+                  onClick={() => dispatch({ type: "ADD_SESSION", dayIndex })}
                 >
                   <Plus className="size-4" />
                   Add session
@@ -86,16 +83,6 @@ export function DayTabs() {
         ))}
       </Tabs>
 
-      <AddSessionDialog
-        open={addSessionDay !== null}
-        onOpenChange={(v) => { if (!v) setAddSessionDay(null); }}
-        onConfirm={(name) => {
-          if (addSessionDay !== null) {
-            dispatch({ type: "ADD_SESSION", dayIndex: addSessionDay, name });
-            setAddSessionDay(null);
-          }
-        }}
-      />
     </div>
   );
 }

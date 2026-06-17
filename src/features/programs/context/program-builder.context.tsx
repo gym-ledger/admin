@@ -13,16 +13,16 @@ import type {
 import { DAY_FULL_NAMES } from "@/features/programs/types";
 
 function makeDefaultDays(): ProgramBuilderDay[] {
-  return DAY_FULL_NAMES.map((_, i) => ({
-    dayNumber: i + 1,
-    name: "",
+  return DAY_FULL_NAMES.map((name, i) => ({
+    day_number: i + 1,
+    name,
     sessions: [makeDefaultSession()],
     visibility: "public" as const,
   }));
 }
 
 function makeDefaultSession(): ProgramBuilderSession {
-  return { tempId: crypto.randomUUID(), name: "Morning", exercises: [], visibility: "public" };
+  return { tempId: crypto.randomUUID(), name: "", exercises: [], visibility: "public" };
 }
 
 export const INITIAL_STATE: ProgramBuilderState = {
@@ -47,7 +47,7 @@ type Action =
   | { type: "SET_DURATION_WEEKS"; value: number }
   | { type: "SET_VERSION_VISIBILITY"; value: "public" | "private" }
   | { type: "SET_DAY_NAME"; dayIndex: number; value: string }
-  | { type: "ADD_SESSION"; dayIndex: number; name: string }
+  | { type: "ADD_SESSION"; dayIndex: number }
   | { type: "REMOVE_SESSION"; dayIndex: number; sessionTempId: string }
   | { type: "SET_SESSION_NAME"; dayIndex: number; sessionTempId: string; value: string }
   | { type: "ADD_EXERCISE"; dayIndex: number; sessionTempId: string; exercise: ProgramBuilderExercise }
@@ -74,11 +74,15 @@ function reducer(state: ProgramBuilderState, action: Action): ProgramBuilderStat
     }
 
     case "ADD_SESSION": {
-      const days = state.days.map((d, i) =>
-        i === action.dayIndex
-          ? { ...d, sessions: [...d.sessions, { tempId: crypto.randomUUID(), name: action.name, exercises: [], visibility: "public" as const }] }
-          : d
-      );
+      const days = state.days.map((d, i) => {
+        if (i !== action.dayIndex) return d;
+        const count = d.sessions.length;
+        const newName = `Session ${count + 1}`;
+        const sessions = count === 1
+          ? [{ ...d.sessions[0], name: "Session 1" }, { tempId: crypto.randomUUID(), name: "Session 2", exercises: [], visibility: "public" as const }]
+          : [...d.sessions, { tempId: crypto.randomUUID(), name: newName, exercises: [], visibility: "public" as const }];
+        return { ...d, sessions };
+      });
       return { ...state, days };
     }
 
@@ -104,12 +108,12 @@ function reducer(state: ProgramBuilderState, action: Action): ProgramBuilderStat
       const days = state.days.map((d, i) =>
         i === action.dayIndex
           ? {
-              ...d, sessions: d.sessions.map((s) =>
-                s.tempId === action.sessionTempId
-                  ? { ...s, exercises: [...s.exercises, { ...action.exercise, exercise_order: s.exercises.length + 1 }] }
-                  : s
-              ),
-            }
+            ...d, sessions: d.sessions.map((s) =>
+              s.tempId === action.sessionTempId
+                ? { ...s, exercises: [...s.exercises, { ...action.exercise, exercise_order: s.exercises.length + 1 }] }
+                : s
+            ),
+          }
           : d
       );
       return { ...state, days };
@@ -119,12 +123,12 @@ function reducer(state: ProgramBuilderState, action: Action): ProgramBuilderStat
       const days = state.days.map((d, i) =>
         i === action.dayIndex
           ? {
-              ...d, sessions: d.sessions.map((s) =>
-                s.tempId === action.sessionTempId
-                  ? { ...s, exercises: s.exercises.map((e) => e.tempId === action.exercise.tempId ? action.exercise : e) }
-                  : s
-              ),
-            }
+            ...d, sessions: d.sessions.map((s) =>
+              s.tempId === action.sessionTempId
+                ? { ...s, exercises: s.exercises.map((e) => e.tempId === action.exercise.tempId ? action.exercise : e) }
+                : s
+            ),
+          }
           : d
       );
       return { ...state, days };
@@ -134,16 +138,16 @@ function reducer(state: ProgramBuilderState, action: Action): ProgramBuilderStat
       const days = state.days.map((d, i) =>
         i === action.dayIndex
           ? {
-              ...d, sessions: d.sessions.map((s) =>
-                s.tempId === action.sessionTempId
-                  ? {
-                      ...s, exercises: s.exercises
-                        .filter((e) => e.tempId !== action.exerciseTempId)
-                        .map((e, idx) => ({ ...e, exercise_order: idx + 1 })),
-                    }
-                  : s
-              ),
-            }
+            ...d, sessions: d.sessions.map((s) =>
+              s.tempId === action.sessionTempId
+                ? {
+                  ...s, exercises: s.exercises
+                    .filter((e) => e.tempId !== action.exerciseTempId)
+                    .map((e, idx) => ({ ...e, exercise_order: idx + 1 })),
+                }
+                : s
+            ),
+          }
           : d
       );
       return { ...state, days };

@@ -7,13 +7,13 @@ import { useProgram } from "@/features/programs/components/hooks/use-programs";
 import type { ProgramWithDetails, ProgramBuilderState, ProgramBuilderDay } from "@/features/programs/types";
 
 function mapProgramToBuilderState(program: ProgramWithDetails): ProgramBuilderState {
-  const daysByNumber = new Map(program.program_days.map((d) => [d.dayNumber, d]));
+  const daysByNumber = new Map(program.program_days.map((d) => [d.day_number, d]));
 
   const days: ProgramBuilderDay[] = Array.from({ length: 7 }, (_, i) => {
     const day = daysByNumber.get(i + 1);
     if (day) {
       return {
-        dayNumber: day.dayNumber,
+        day_number: day.day_number,
         name: day.name ?? "",
         visibility: day.visibility,
         sessions: day.sessions.map((session) => ({
@@ -38,7 +38,7 @@ function mapProgramToBuilderState(program: ProgramWithDetails): ProgramBuilderSt
       };
     }
     return {
-      dayNumber: i + 1,
+      day_number: i + 1,
       name: "",
       sessions: [{ tempId: crypto.randomUUID(), name: "Morning", exercises: [], visibility: "public" as const }],
       visibility: "public" as const,

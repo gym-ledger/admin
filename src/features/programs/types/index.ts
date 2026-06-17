@@ -34,7 +34,7 @@ export interface ProgramBuilderSession {
 }
 
 export interface ProgramBuilderDay {
-  dayNumber: number; // 1-7
+  day_number: number; // 1-7
   name: string;
   sessions: ProgramBuilderSession[];
   visibility: "public" | "private";
@@ -61,7 +61,7 @@ export interface ProgramWithDetails extends WorkoutProgram {
   duration_weeks: number;
   version_visibility: "public" | "private";
   program_days: {
-    dayNumber: number;
+    day_number: number;
     name: string;
     visibility: "public" | "private";
     sessions: {
