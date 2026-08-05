@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Loader2, ImageIcon, X } from "lucide-react";
@@ -27,9 +27,16 @@ import {
   exerciseFormSchema,
   type ExerciseFormInput,
 } from "@/features/exercises/schemas/exercise.schema";
-import { useCreateExercise, useUpdateExercise } from "@/features/exercises/hooks/use-exercises";
+import {
+  useCreateExercise,
+  useUpdateExercise,
+  useExercise,
+} from "@/features/exercises/hooks/use-exercises";
+import {
+  ExerciseMusclesField,
+  type ExerciseMuscleSelection,
+} from "@/features/exercises/components/exercise-muscles-field";
 import type { Exercise } from "@/features/exercises/types";
-import { useState } from "react";
 
 interface ExerciseFormDrawerProps {
   open: boolean;
@@ -47,9 +54,15 @@ export function ExerciseFormDrawer({
   const updateMutation = useUpdateExercise();
   const isPending = createMutation.isPending || updateMutation.isPending;
 
+  const { data: detail, isLoading: isLoadingDetail } = useExercise(
+    open && exercise ? exercise.id : null,
+  );
+
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const [exerciseMuscles, setExerciseMuscles] = useState<ExerciseMuscleSelection[]>([]);
 
   const {
     register,
@@ -64,21 +77,32 @@ export function ExerciseFormDrawer({
   });
 
   useEffect(() => {
-    if (open) {
-      if (exercise) {
-        reset({
-          name: exercise.name,
-          description: exercise.description ?? "",
-          visibility: exercise.visibility as "public" | "private",
-        });
-        setImagePreview(exercise.image_url ?? null);
-      } else {
-        reset({ name: "", description: "", visibility: "public" });
-        setImagePreview(null);
-      }
-      setImageFile(null);
+    if (!open) return;
+    if (exercise) {
+      reset({
+        name: exercise.name,
+        description: exercise.description ?? "",
+        visibility: exercise.visibility as "public" | "private",
+      });
+      setImagePreview(exercise.image_url ?? null);
+    } else {
+      reset({ name: "", description: "", visibility: "public" });
+      setImagePreview(null);
+      setExerciseMuscles([]);
     }
+    setImageFile(null);
   }, [open, exercise, reset]);
+
+  useEffect(() => {
+    if (!open || !detail) return;
+    setExerciseMuscles(
+      detail.exerciseMuscles.map((em) => ({
+        muscle_id: em.muscle.id,
+        muscleName: em.muscle.name,
+        contributionPercent: Math.round(em.contribution * 100),
+      })),
+    );
+  }, [open, detail]);
 
   function handleImageChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
@@ -99,6 +123,10 @@ export function ExerciseFormDrawer({
       description: data.description || undefined,
       visibility: data.visibility,
       image: imageFile ?? undefined,
+      exerciseMuscles: exerciseMuscles.map((m) => ({
+        muscle_id: m.muscle_id,
+        contribution: m.contributionPercent / 100,
+      })),
     };
 
     if (isEdit && exercise) {
@@ -223,6 +251,27 @@ export function ExerciseFormDrawer({
               onChange={handleImageChange}
             />
             <p className="text-xs text-muted-foreground">Max 5MB. JPG, PNG, WebP.</p>
+          </div>
+
+          {/* Muscles */}
+          <div className="flex flex-col gap-1.5">
+            <div>
+              <Label>Muscles worked</Label>
+              <p className="mt-0.5 text-xs text-muted-foreground">
+                Select the muscles this exercise targets and how much each is
+                worked.
+              </p>
+            </div>
+            <ExerciseMusclesField
+              value={exerciseMuscles}
+              onChange={setExerciseMuscles}
+            />
+            {isEdit && isLoadingDetail && (
+              <p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <Loader2 className="size-3 animate-spin" />
+                Loading current muscles…
+              </p>
+            )}
           </div>
         </form>
 

@@ -6,6 +6,7 @@ import {
 import { toast } from "sonner";
 import {
   listExercises,
+  getExercise,
   createExercise,
   updateExercise,
   deleteExercise,
@@ -20,12 +21,21 @@ import { getErrorMessage } from "@/types/api";
 export const exerciseKeys = {
   all: ["exercises"] as const,
   list: (params: ListExercisesParams) => ["exercises", "list", params] as const,
+  detail: (id: string) => ["exercises", "detail", id] as const,
 };
 
 export function useExercises(params: ListExercisesParams = {}) {
   return useQuery({
     queryKey: exerciseKeys.list(params),
     queryFn: () => listExercises(params),
+  });
+}
+
+export function useExercise(id: string | null) {
+  return useQuery({
+    queryKey: exerciseKeys.detail(id ?? ""),
+    queryFn: () => getExercise(id as string),
+    enabled: !!id,
   });
 }
 

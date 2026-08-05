@@ -84,13 +84,15 @@ export function MuscleFormDrawer({
     return () => clearTimeout(t);
   }, [childSearch]);
 
-  useEffect(() => {
-    if (!parentPickerOpen) setParentSearch("");
-  }, [parentPickerOpen]);
+  function handleParentPickerOpenChange(next: boolean) {
+    setParentPickerOpen(next);
+    if (!next) setParentSearch("");
+  }
 
-  useEffect(() => {
-    if (!childPickerOpen) setChildSearch("");
-  }, [childPickerOpen]);
+  function handleChildPickerOpenChange(next: boolean) {
+    setChildPickerOpen(next);
+    if (!next) setChildSearch("");
+  }
 
   const excludeIds = [
     ...(muscle ? [muscle.id] : []),
@@ -326,7 +328,7 @@ export function MuscleFormDrawer({
                   </Button>
                 </div>
               ) : (
-                <Popover open={parentPickerOpen} onOpenChange={setParentPickerOpen}>
+                <Popover open={parentPickerOpen} onOpenChange={handleParentPickerOpenChange}>
                   <PopoverTrigger asChild>
                     <Button
                       type="button"
@@ -402,7 +404,7 @@ export function MuscleFormDrawer({
                   ))}
                 </div>
               )}
-              <Popover open={childPickerOpen} onOpenChange={setChildPickerOpen}>
+              <Popover open={childPickerOpen} onOpenChange={handleChildPickerOpenChange}>
                 <PopoverTrigger asChild>
                   <Button
                     type="button"

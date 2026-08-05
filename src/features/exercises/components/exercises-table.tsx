@@ -25,6 +25,7 @@ import {
   Lock,
   Download,
   Upload,
+  Bone,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -167,6 +168,20 @@ export function ExercisesTable() {
             <Lock className="size-3" />
             Private
           </Badge>
+        );
+      },
+    }),
+    columnHelper.accessor("muscle_count", {
+      header: "Muscles",
+      cell: ({ getValue }) => {
+        const count = Number(getValue() ?? 0);
+        return count > 0 ? (
+          <Badge variant="outline" className="gap-1 font-normal">
+            <Bone className="size-3" />
+            {count}
+          </Badge>
+        ) : (
+          <span className="text-xs text-muted-foreground">—</span>
         );
       },
     }),
