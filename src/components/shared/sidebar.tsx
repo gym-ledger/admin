@@ -13,6 +13,7 @@ import {
   LogOut,
   Layers,
   TrendingUp,
+  Bone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -24,6 +25,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/comp
 const NAV_ITEMS = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/exercises", label: "Exercises", icon: Dumbbell },
+  { href: "/muscles", label: "Muscles", icon: Bone },
   { href: "/programs", label: "Programs", icon: Layers },
   { href: "/progression-rules", label: "Progression Rules", icon: TrendingUp },
   { href: "/users", label: "Users", icon: Users },
