@@ -1,35 +1,52 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { Save, X } from "lucide-react";
+import { useState } from "react";
+import { Save, X, Pencil, GitBranchPlus } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProgramBuilderProvider, useProgramBuilder } from "@/features/programs/context/program-builder.context";
 import { ProgramConfigSection } from "./program-config-section";
 import { DayTabs } from "./day-tabs";
 import { useCreateProgram, useUpdateProgram } from "@/features/programs/components/hooks/use-programs";
+import type { CreateWorkoutProgramPayload } from "@/features/programs/components/services/programs.service";
 import type { ProgramBuilderState } from "@/features/programs/types";
+import { cn } from "@/lib/utils";
 import { toast } from "sonner";
 
 interface BuilderInnerProps {
   programId?: string;
+  readOnly?: boolean;
+  saveLabel?: string;
+  onSave?: (payload: CreateWorkoutProgramPayload) => Promise<unknown>;
+  onSaveAsNewVersion?: (payload: CreateWorkoutProgramPayload) => Promise<unknown>;
+  onRequestEdit?: () => void;
+  headerExtra?: React.ReactNode;
 }
 
-function BuilderInner({ programId }: BuilderInnerProps) {
+function BuilderInner({
+  programId,
+  readOnly,
+  saveLabel,
+  onSave,
+  onSaveAsNewVersion,
+  onRequestEdit,
+  headerExtra,
+}: BuilderInnerProps) {
   const router = useRouter();
   const { state, dispatch } = useProgramBuilder();
   const createMutation = useCreateProgram();
   const updateMutation = useUpdateProgram();
+  const [isSavingNewVersion, setIsSavingNewVersion] = useState(false);
 
   const isEditing = !!programId;
-  const isPending = createMutation.isPending || updateMutation.isPending;
+  const isPending = createMutation.isPending || updateMutation.isPending || isSavingNewVersion;
 
-  async function handleSave() {
+  function buildPayload(): CreateWorkoutProgramPayload | null {
     if (!state.name.trim()) {
       toast.error("Program name is required");
-      return;
+      return null;
     }
-
-    const payload = {
+    return {
       name: state.name,
       description: state.description,
       visibility: state.visibility,
@@ -40,14 +57,35 @@ function BuilderInner({ programId }: BuilderInnerProps) {
       version_visibility: state.version_visibility,
       program_days: state.days,
     };
+  }
 
-    if (isEditing) {
-      await updateMutation.mutateAsync({ id: programId, ...payload });
+  async function handleSave() {
+    const payload = buildPayload();
+    if (!payload) return;
+
+    if (onSave) {
+      await onSave(payload);
+    } else if (isEditing) {
+      await updateMutation.mutateAsync({ id: programId!, ...payload });
     } else {
       await createMutation.mutateAsync(payload);
       dispatch({ type: "RESET" });
     }
     router.push("/programs");
+  }
+
+  async function handleSaveAsNewVersion() {
+    if (!onSaveAsNewVersion) return;
+    const payload = buildPayload();
+    if (!payload) return;
+
+    setIsSavingNewVersion(true);
+    try {
+      await onSaveAsNewVersion(payload);
+      router.push("/programs");
+    } finally {
+      setIsSavingNewVersion(false);
+    }
   }
 
   return (
@@ -64,22 +102,49 @@ function BuilderInner({ programId }: BuilderInnerProps) {
           </p>
         </div>
         <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            disabled={isPending}
-            onClick={() => { dispatch({ type: "RESET" }); router.push("/programs"); }}
-          >
-            <X className="size-4" /> Discard
-          </Button>
-          <Button size="sm" onClick={handleSave} disabled={isPending}>
-            <Save className="size-4" /> {isEditing ? "Save changes" : "Save program"}
-          </Button>
+          {headerExtra}
+          {readOnly ? (
+            onRequestEdit && (
+              <Button size="sm" onClick={onRequestEdit}>
+                <Pencil className="size-4" /> Edit this version
+              </Button>
+            )
+          ) : (
+            <>
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={isPending}
+                onClick={() => { dispatch({ type: "RESET" }); router.push("/programs"); }}
+              >
+                <X className="size-4" /> Discard
+              </Button>
+              {onSaveAsNewVersion && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  disabled={isPending}
+                  onClick={handleSaveAsNewVersion}
+                >
+                  <GitBranchPlus className="size-4" /> Save as new version
+                </Button>
+              )}
+              <Button size="sm" onClick={handleSave} disabled={isPending}>
+                <Save className="size-4" /> {saveLabel ?? (isEditing ? "Save changes" : "Save program")}
+              </Button>
+            </>
+          )}
         </div>
       </div>
 
       {/* Content */}
-      <div className="flex flex-col gap-5 px-6 py-5">
+      <div
+        className={cn(
+          "flex flex-col gap-5 px-6 py-5",
+          readOnly && "pointer-events-none select-none opacity-60",
+        )}
+        aria-disabled={readOnly}
+      >
         <ProgramConfigSection />
         <DayTabs />
       </div>
@@ -90,12 +155,35 @@ function BuilderInner({ programId }: BuilderInnerProps) {
 interface ProgramBuilderProps {
   programId?: string;
   initialValues?: ProgramBuilderState;
+  readOnly?: boolean;
+  saveLabel?: string;
+  onSave?: (payload: CreateWorkoutProgramPayload) => Promise<unknown>;
+  onSaveAsNewVersion?: (payload: CreateWorkoutProgramPayload) => Promise<unknown>;
+  onRequestEdit?: () => void;
+  headerExtra?: React.ReactNode;
 }
 
-export function ProgramBuilder({ programId, initialValues }: ProgramBuilderProps = {}) {
+export function ProgramBuilder({
+  programId,
+  initialValues,
+  readOnly,
+  saveLabel,
+  onSave,
+  onSaveAsNewVersion,
+  onRequestEdit,
+  headerExtra,
+}: ProgramBuilderProps = {}) {
   return (
     <ProgramBuilderProvider initialValues={initialValues}>
-      <BuilderInner programId={programId} />
+      <BuilderInner
+        programId={programId}
+        readOnly={readOnly}
+        saveLabel={saveLabel}
+        onSave={onSave}
+        onSaveAsNewVersion={onSaveAsNewVersion}
+        onRequestEdit={onRequestEdit}
+        headerExtra={headerExtra}
+      />
     </ProgramBuilderProvider>
   );
 }

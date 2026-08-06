@@ -28,8 +28,33 @@ export async function listWorkoutPrograms(
   );
 }
 
-export async function getWorkoutProgram(id: string): Promise<ProgramWithDetails> {
-  return apiClient.get<ProgramWithDetails>(`/admin/crud/workout-programs/view/${id}`);
+export async function getWorkoutProgram(
+  id: string,
+  versionId?: string,
+): Promise<ProgramWithDetails> {
+  const qs = versionId ? `?versionId=${versionId}` : "";
+  return apiClient.get<ProgramWithDetails>(`/admin/crud/workout-programs/view/${id}${qs}`);
+}
+
+export interface ProgramVersion {
+  id: string;
+  workout_program_id: string;
+  description: string;
+  version_number: number;
+  version_name: string | null;
+  training_days: number;
+  split_type: SplitType;
+  session_ordering_logic: SessionOrderingLogic;
+  duration_type: DurationType;
+  duration_weeks: number;
+  visibility: "public" | "private";
+  created_at: string;
+  updated_at: string;
+  usage_count: number;
+}
+
+export async function listProgramVersions(programId: string): Promise<ProgramVersion[]> {
+  return apiClient.get<ProgramVersion[]>(`/admin/crud/workout-programs/${programId}/versions`);
 }
 
 export interface CreateWorkoutProgramPayload {
@@ -63,4 +88,15 @@ export async function updateWorkoutProgram(
 
 export async function deleteWorkoutProgram(id: string): Promise<WorkoutProgram> {
   return apiClient.delete<WorkoutProgram>(`/admin/crud/workout-programs/delete/${id}`);
+}
+
+export interface CreateProgramVersionPayload extends CreateWorkoutProgramPayload {
+  id: string;
+}
+
+export async function createProgramVersion(
+  payload: CreateProgramVersionPayload,
+): Promise<ProgramWithDetails> {
+  const { id, ...rest } = payload;
+  return apiClient.post<ProgramWithDetails>(`/admin/crud/workout-programs/${id}/versions`, rest);
 }
