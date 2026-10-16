@@ -8,7 +8,7 @@ import { Loader2, Dumbbell } from "lucide-react";
 import { loginSchema, type LoginInput } from "@/features/auth/schemas/login.schema";
 import { loginAdmin } from "@/features/auth/services/auth.service";
 import { useAuthStore } from "@/stores/auth.store";
-import { decodeJwtExpiry } from "@/auth/authConstants";
+import { decodeJwtExpiry, normalizeExpiresAt } from "@/auth/authConstants";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -30,8 +30,9 @@ export function LoginForm() {
       setTokens(
         {
           accessToken: res.accessToken,
-          refreshToken: res.refreshToken,
-          accessTokenExpiresAt: decodeJwtExpiry(res.accessToken),
+          accessTokenExpiresAt: res.accessTokenExpiresAt
+            ? normalizeExpiresAt(res.accessTokenExpiresAt)
+            : decodeJwtExpiry(res.accessToken),
         },
         res.admin,
       );
@@ -70,7 +71,6 @@ export function LoginForm() {
                 id="email"
                 type="email"
                 placeholder="admin@example.com"
-                defaultValue="test@test.com"
                 autoComplete="email"
                 aria-invalid={!!errors.email}
                 {...register("email")}
@@ -86,7 +86,6 @@ export function LoginForm() {
                 id="password"
                 type="password"
                 placeholder="••••••••"
-                defaultValue="test@test.com"
                 autoComplete="current-password"
                 aria-invalid={!!errors.password}
                 {...register("password")}

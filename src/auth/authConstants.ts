@@ -2,6 +2,7 @@ export const STORAGE_KEY = "admin-auth-rt" as const;
 export const BROADCAST_CHANNEL_NAME = "admin-auth" as const;
 export const ACCESS_TOKEN_EXPIRY_BUFFER_MS = 60_000;
 export const REFRESH_ENDPOINT = "/admin/auth/refresh-tokens" as const;
+export const LOGOUT_ENDPOINT = "/admin/auth/logout" as const;
 export const API_BASE = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:4000/api/v1";
 
 export function normalizeExpiresAt(raw: string | number): number {

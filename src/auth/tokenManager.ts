@@ -2,6 +2,7 @@ import { useAuthStore } from "@/stores/auth.store";
 import {
   ACCESS_TOKEN_EXPIRY_BUFFER_MS,
   REFRESH_ENDPOINT,
+  LOGOUT_ENDPOINT,
   API_BASE,
   BROADCAST_CHANNEL_NAME,
   normalizeExpiresAt,
@@ -20,8 +21,6 @@ export function initBroadcastChannel(): () => void {
     const msg = event.data;
     if (msg.type === "TOKEN_REFRESHED") {
       useAuthStore.getState().setAccessToken(msg.accessToken, msg.accessTokenExpiresAt);
-    } else if (msg.type === "REFRESH_TOKEN_ROTATED") {
-      useAuthStore.getState().setRefreshToken(msg.refreshToken);
     } else if (msg.type === "LOGGED_OUT") {
       useAuthStore.getState().clearAuth();
     }
@@ -44,14 +43,14 @@ export function isAccessTokenExpiringSoon(expiresAt: number | null): boolean {
 }
 
 export async function getValidAccessToken(): Promise<string> {
-  const { accessToken, accessTokenExpiresAt, refreshToken } = useAuthStore.getState();
+  const { accessToken, accessTokenExpiresAt, hasSession } = useAuthStore.getState();
 
   if (accessToken && !isAccessTokenExpiringSoon(accessTokenExpiresAt)) {
     return accessToken;
   }
 
-  if (!refreshToken) {
-    throw new Error("No refresh token available");
+  if (!hasSession) {
+    throw new Error("No session");
   }
 
   return refreshAccessToken();
@@ -67,18 +66,18 @@ export function refreshAccessToken(): Promise<string> {
 }
 
 async function doRefresh(): Promise<string> {
-  const { refreshToken } = useAuthStore.getState();
-
-  if (!refreshToken) {
+  if (!useAuthStore.getState().hasSession) {
     performLogout();
-    throw new Error("No refresh token");
+    throw new Error("No session");
   }
 
   let res: Response;
   try {
+    // The refresh token is the httpOnly cookie the browser attaches itself;
+    // the API rotates it in the same response.
     res = await fetch(`${API_BASE}${REFRESH_ENDPOINT}`, {
       method: "PUT",
-      headers: { "refresh-token": refreshToken },
+      credentials: "include",
     });
   } catch {
     throw new Error("Network error during token refresh");
@@ -102,7 +101,7 @@ async function doRefresh(): Promise<string> {
 
   type RefreshResponseBody = {
     success: boolean;
-    data: { accessToken: string; accessTokenExpiresAt: string | number; refreshToken: string };
+    data: { accessToken: string; accessTokenExpiresAt: string | number };
   };
   const body = (await res.json()) as RefreshResponseBody;
 
@@ -114,12 +113,10 @@ async function doRefresh(): Promise<string> {
   const {
     accessToken: newAccessToken,
     accessTokenExpiresAt: rawExpiry,
-    refreshToken: newRefreshToken,
   } = body.data;
   const expiresAt = normalizeExpiresAt(rawExpiry);
 
   useAuthStore.getState().setAccessToken(newAccessToken, expiresAt);
-  useAuthStore.getState().setRefreshToken(newRefreshToken);
 
   broadcastChannel?.postMessage({
     type: "TOKEN_REFRESHED",
@@ -127,16 +124,22 @@ async function doRefresh(): Promise<string> {
     accessTokenExpiresAt: expiresAt,
   } satisfies AuthBroadcastEvent);
 
-  broadcastChannel?.postMessage({
-    type: "REFRESH_TOKEN_ROTATED",
-    refreshToken: newRefreshToken,
-  } satisfies AuthBroadcastEvent);
-
   return newAccessToken;
 }
 
 export function performLogout(): void {
+  const { hasSession } = useAuthStore.getState();
+
   activeRefreshPromise = null;
   useAuthStore.getState().clearAuth();
   broadcastChannel?.postMessage({ type: "LOGGED_OUT" } satisfies AuthBroadcastEvent);
+
+  // Best-effort: the API ends the session and clears the httpOnly cookie.
+  // The local session is already gone, so failures are deliberately ignored.
+  if (hasSession) {
+    fetch(`${API_BASE}${LOGOUT_ENDPOINT}`, {
+      method: "DELETE",
+      credentials: "include",
+    }).catch(() => {});
+  }
 }

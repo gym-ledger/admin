@@ -1,10 +1,11 @@
 import { apiClient } from "@/lib/api-client";
 import type { AdminUser } from "@/stores/auth.store";
 
+/** The refresh token isn't here: the API sets it as an httpOnly cookie. */
 export interface LoginResponse {
   admin: AdminUser;
   accessToken: string;
-  refreshToken: string;
+  accessTokenExpiresAt: string;
 }
 
 export async function loginAdmin(credentials: {

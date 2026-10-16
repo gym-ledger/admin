@@ -1,12 +1,14 @@
 export type AuthStatus = "loading" | "authenticated" | "unauthenticated";
 
+/**
+ * What the client holds after sign-in. The refresh token is not here: the API
+ * keeps it in an httpOnly cookie that page JavaScript can never read.
+ */
 export interface AuthTokens {
   accessToken: string;
   accessTokenExpiresAt: number;
-  refreshToken: string;
 }
 
 export type AuthBroadcastEvent =
   | { type: "TOKEN_REFRESHED"; accessToken: string; accessTokenExpiresAt: number }
-  | { type: "REFRESH_TOKEN_ROTATED"; refreshToken: string }
   | { type: "LOGGED_OUT" };

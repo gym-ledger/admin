@@ -28,11 +28,13 @@ async function request<T>(path: string, options: RequestOptions = {}): Promise<T
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
   };
 
-  const res = await fetch(`${API_BASE}${path}`, { ...fetchOptions, headers });
+  // credentials: "include" lets the login response set the httpOnly refresh
+  // cookie (cross-origin fetches ignore Set-Cookie otherwise). The cookie is
+  // path-scoped to /admin/auth on the API, so other calls never carry it.
+  const res = await fetch(`${API_BASE}${path}`, { ...fetchOptions, headers, credentials: "include" });
 
   if (res.status === 401 && !_retried) {
-    const { refreshToken } = useAuthStore.getState();
-    if (!refreshToken) {
+    if (!useAuthStore.getState().hasSession) {
       throw new ApiError(401, "Unauthorized");
     }
 
