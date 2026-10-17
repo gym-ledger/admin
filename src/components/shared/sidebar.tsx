@@ -14,6 +14,7 @@ import {
   Layers,
   TrendingUp,
   Bone,
+  Sparkles,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -30,6 +31,7 @@ const NAV_ITEMS = [
   { href: "/progression-rules", label: "Progression Rules", icon: TrendingUp },
   { href: "/users", label: "Users", icon: Users },
   { href: "/analytics", label: "Analytics", icon: BarChart2 },
+  { href: "/ai-usage", label: "AI Usage", icon: Sparkles },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
