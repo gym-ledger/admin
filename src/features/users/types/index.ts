@@ -77,3 +77,10 @@ export interface UserDetail {
     created_at: string;
   }[];
 }
+
+export interface CheckinRetryResult {
+  id: string;
+  status: "pending" | "ready" | "failed" | "skipped";
+  attempts: number;
+  next_retry_at: string | null;
+}

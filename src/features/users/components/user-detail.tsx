@@ -1,11 +1,12 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2, RotateCw } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { ApiError, getErrorMessage } from "@/types/api";
-import { useUser } from "@/features/users/hooks/use-users";
+import { useRetryCheckin, useUser } from "@/features/users/hooks/use-users";
 import type { UserDetail as UserDetailData } from "@/features/users/types";
 import {
   ErrorState,
@@ -106,6 +107,7 @@ function BackLink() {
 
 export function UserDetail({ id }: { id: string }) {
   const { data, isLoading, isError, error, refetch } = useUser(id);
+  const retry = useRetryCheckin(id);
 
   if (isLoading) {
     return (
@@ -145,7 +147,7 @@ export function UserDetail({ id }: { id: string }) {
 
   return (
     <div className="flex flex-col">
-      <PageHeader title={user.name ?? "No name"} description="Read-only view">
+      <PageHeader title={user.name ?? "No name"} description="Read-only, except retrying failed check-ins">
         <BackLink />
       </PageHeader>
 
@@ -228,7 +230,7 @@ export function UserDetail({ id }: { id: string }) {
         <div className="grid gap-4 lg:grid-cols-2">
           <Panel title="Weekly check-ins" description="Status only; the written note isn't shown here">
             <SimpleTable
-              columns={["Week of", "Status", "Attempts", "Detail"]}
+              columns={["Week of", "Status", "Attempts", "Detail", ""]}
               empty="No check-ins yet."
               rows={checkins.map((c) => [
                 formatDay(c.week_start, true),
@@ -245,6 +247,23 @@ export function UserDetail({ id }: { id: string }) {
                         ? `Retry after ${formatDateTime(c.next_retry_at)}`
                         : ""}
                 </span>,
+                c.status === "failed" ? (
+                  <Button
+                    key="r"
+                    variant="outline"
+                    size="xs"
+                    disabled={retry.isPending}
+                    onClick={() => retry.mutate(c.id)}
+                    title="Check the week again and call the model now, instead of waiting for the next automatic retry"
+                  >
+                    {retry.isPending && retry.variables === c.id ? (
+                      <Loader2 className="animate-spin" />
+                    ) : (
+                      <RotateCw />
+                    )}
+                    Retry now
+                  </Button>
+                ) : null,
               ])}
             />
           </Panel>

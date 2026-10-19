@@ -1,6 +1,7 @@
 import { apiClient } from "@/lib/api-client";
 import type { PaginatedData } from "@/types/api";
 import type {
+  CheckinRetryResult,
   UserActivityFilter,
   UserDetail,
   UserListItem,
@@ -37,4 +38,9 @@ export async function listUsers(
 
 export async function getUser(id: string): Promise<UserDetail> {
   return apiClient.get<UserDetail>(`/admin/analytics/users/view/${id}`);
+}
+
+/** Runs a failed weekly check-in again now instead of waiting for its next retry. */
+export async function retryCheckin(checkinId: string): Promise<CheckinRetryResult> {
+  return apiClient.post<CheckinRetryResult>(`/admin/analytics/checkins/${checkinId}/retry`);
 }
