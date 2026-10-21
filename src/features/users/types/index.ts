@@ -1,4 +1,4 @@
-/** Activity figures, defined in workout-gym-api/algorithms/user-activity.md. */
+/** Activity figures, defined in gym-ledger/api/algorithms/user-activity.md. */
 export interface UserActivity {
   created_at: string;
   last_active_at: string | null;

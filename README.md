@@ -1,4 +1,4 @@
-# workout-gym-admin-panel
+# gym-ledger/admin
 
 Internal admin dashboard for managing exercises, workout programs, and progression rules.
 
