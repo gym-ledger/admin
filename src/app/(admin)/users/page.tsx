@@ -3,7 +3,7 @@ import { PageHeader } from "@/features/analytics/components/dashboard-parts";
 import { UsersTable } from "@/features/users/components/users-table";
 
 export const metadata: Metadata = {
-  title: "Users — GymAdmin",
+  title: "Users — Gym Ledger",
 };
 
 export default function UsersPage() {

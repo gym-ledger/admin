@@ -57,7 +57,7 @@ export function LoginForm() {
           </div>
           <div className="text-center">
             <h1 className="text-lg font-semibold tracking-tight text-foreground">
-              GymAdmin
+              Gym Ledger
             </h1>
             <p className="text-sm text-muted-foreground">
               Sign in to your admin account

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { MusclesTable } from "@/features/muscles/components/muscles-table";
 
 export const metadata: Metadata = {
-  title: "Muscles — GymAdmin",
+  title: "Muscles — Gym Ledger",
 };
 
 export default function MusclesPage() {

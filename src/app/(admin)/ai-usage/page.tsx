@@ -3,7 +3,7 @@ import { PageHeader } from "@/features/analytics/components/dashboard-parts";
 import { AiUsageDashboard } from "@/features/analytics/components/ai-usage-dashboard";
 
 export const metadata: Metadata = {
-  title: "AI Usage — GymAdmin",
+  title: "AI Usage — Gym Ledger",
 };
 
 export default function AiUsagePage() {

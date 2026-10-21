@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ProgressionRulesTable } from "@/features/progression-rules/components/progression-rules-table";
 
-export const metadata: Metadata = { title: "Progression Rules — GymAdmin" };
+export const metadata: Metadata = { title: "Progression Rules — Gym Ledger" };
 
 export default function ProgressionRulesPage() {
   return (

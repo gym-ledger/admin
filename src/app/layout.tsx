@@ -9,8 +9,8 @@ const geist = Geist({
 });
 
 export const metadata: Metadata = {
-  title: "GymAdmin",
-  description: "Workout gym administration panel",
+  title: "Gym Ledger",
+  description: "Gym Ledger administration panel",
 };
 
 export default function RootLayout({

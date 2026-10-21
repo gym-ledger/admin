@@ -56,7 +56,7 @@ export function Sidebar() {
             </div>
             {!collapsed && (
               <span className="truncate text-sm font-semibold tracking-tight text-foreground">
-                GymAdmin
+                Gym Ledger
               </span>
             )}
           </div>

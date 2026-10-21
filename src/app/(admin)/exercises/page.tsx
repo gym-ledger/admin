@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ExercisesTable } from "@/features/exercises/components/exercises-table";
 
 export const metadata: Metadata = {
-  title: "Exercises — GymAdmin",
+  title: "Exercises — Gym Ledger",
 };
 
 export default function ExercisesPage() {

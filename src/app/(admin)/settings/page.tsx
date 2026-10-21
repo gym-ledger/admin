@@ -3,7 +3,7 @@ import { PageHeader } from "@/features/analytics/components/dashboard-parts";
 import { AccountSettings } from "@/features/account/components/account-settings";
 
 export const metadata: Metadata = {
-  title: "Settings — GymAdmin",
+  title: "Settings — Gym Ledger",
 };
 
 export default function SettingsPage() {

@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { UserDetail } from "@/features/users/components/user-detail";
 
 export const metadata: Metadata = {
-  title: "User — GymAdmin",
+  title: "User — Gym Ledger",
 };
 
 export default async function UserDetailPage({

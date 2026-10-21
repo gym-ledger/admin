@@ -3,7 +3,7 @@ import { PageHeader } from "@/features/analytics/components/dashboard-parts";
 import { DashboardHome } from "@/features/analytics/components/dashboard-home";
 
 export const metadata: Metadata = {
-  title: "Dashboard — GymAdmin",
+  title: "Dashboard — Gym Ledger",
 };
 
 export default function DashboardPage() {

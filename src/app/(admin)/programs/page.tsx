@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { ProgramsTable } from "@/features/programs/components/programs-table";
 
-export const metadata: Metadata = { title: "Workout Programs — GymAdmin" };
+export const metadata: Metadata = { title: "Workout Programs — Gym Ledger" };
 
 export default function ProgramsPage() {
   return (
