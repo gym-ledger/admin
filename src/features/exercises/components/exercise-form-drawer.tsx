@@ -130,7 +130,9 @@ export function ExerciseFormDrawer({
     };
 
     if (isEdit && exercise) {
-      await updateMutation.mutateAsync({ id: exercise.id, ...payload });
+      // The saved image was cleared and no new one picked: remove it.
+      const removeImage = !!exercise.image_url && !imagePreview;
+      await updateMutation.mutateAsync({ id: exercise.id, ...payload, removeImage });
     } else {
       await createMutation.mutateAsync(payload);
     }

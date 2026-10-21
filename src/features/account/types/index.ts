@@ -15,7 +15,8 @@ export type SessionEndReason =
   | "signed_out_remotely"
   | "signed_out_others"
   | "password_changed"
-  | "session_limit";
+  | "session_limit"
+  | "token_reused";
 
 export interface AdminSession {
   id: string;

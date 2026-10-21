@@ -60,6 +60,8 @@ export interface UpdateExercisePayload extends Partial<Omit<CreateExercisePayloa
   id: string;
   /** Full desired muscle set — anything omitted here is unlinked. */
   exerciseMuscles: ExerciseMusclePayload[];
+  /** Deletes the current image (ignored when a new `image` is sent). */
+  removeImage?: boolean;
 }
 
 export async function updateExercise(
@@ -71,6 +73,7 @@ export async function updateExercise(
   if (rest.description) form.append("description", rest.description);
   if (rest.visibility) form.append("visibility", rest.visibility);
   if (rest.image) form.append("image", rest.image);
+  else if (rest.removeImage) form.append("remove_image", "true");
   form.append("exerciseMuscles", JSON.stringify(rest.exerciseMuscles));
   return apiClient.put<Exercise>(`/admin/crud/exercises/update/${id}`, form);
 }

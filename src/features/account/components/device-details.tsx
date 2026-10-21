@@ -41,6 +41,7 @@ const END_REASONS: Record<SessionEndReason, string> = {
   signed_out_others: "Signed out (all other devices)",
   password_changed: "Signed out (password changed)",
   session_limit: "Replaced by a newer sign-in",
+  token_reused: "Signed out (old sign-in token reused)",
 };
 
 export function sessionStatusLabel(s: AdminSession): string {
