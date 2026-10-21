@@ -6,6 +6,8 @@ export interface LoginResponse {
   admin: AdminUser;
   accessToken: string;
   accessTokenExpiresAt: string;
+  /** Older devices signed out to stay within the active-session limit. */
+  sessionsReplaced?: number;
 }
 
 export async function loginAdmin(credentials: {

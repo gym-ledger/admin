@@ -36,6 +36,9 @@ export function LoginForm() {
         },
         res.admin,
       );
+      if (res.sessionsReplaced) {
+        toast.info("You were signed in on too many devices, so the one used least recently was signed out.");
+      }
       router.push("/dashboard");
     } catch (err) {
       const message =
