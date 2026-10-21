@@ -84,3 +84,48 @@ export interface Overview {
   active: { dau: number; wau: number; mau: number };
   new_users_per_week: { week_start: string; count: number }[];
 }
+
+export interface DashboardPulse {
+  workouts: number;
+  sets: number;
+  /** Completed a workout or logged a weigh-in. */
+  active_users: number;
+  new_users: number;
+  weigh_ins: number;
+}
+
+export interface Dashboard {
+  generated_at: string;
+  /** Last 7 days against the 7 before. */
+  pulse: { current: DashboardPulse; previous: DashboardPulse };
+  workouts_per_day: { date: string; workouts: number; users: number }[];
+  top_programs: { id: string; name: string; active_users: number }[];
+  top_exercises: { id: string; name: string; sets: number; users: number }[];
+  content: {
+    exercises: number;
+    exercises_without_image: number;
+    exercises_without_muscles: number;
+    muscles: number;
+    programs: number;
+    programs_without_version: number;
+  };
+  attention: {
+    ai_calls_24h: number;
+    ai_failures_24h: number;
+    checkins_failed_7d: number;
+    ai_configured: boolean;
+    ai_daily_limit: number;
+    /** Null if the API couldn't read the counter. */
+    ai_budget_used_today: number | null;
+  };
+  recent_signups: {
+    id: string;
+    name: string | null;
+    /** Masked. */
+    email: string | null;
+    /** Masked. */
+    phone: string | null;
+    created_at: string;
+    onboarded: boolean;
+  }[];
+}

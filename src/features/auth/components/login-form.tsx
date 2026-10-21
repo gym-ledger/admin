@@ -36,7 +36,7 @@ export function LoginForm() {
         },
         res.admin,
       );
-      router.push("/exercises");
+      router.push("/dashboard");
     } catch (err) {
       const message =
         err instanceof ApiError ? err.message : "Something went wrong";

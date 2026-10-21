@@ -3,12 +3,14 @@ import {
   getAiDaily,
   getAiSummary,
   getCheckinOutcomes,
+  getDashboard,
   getOverview,
 } from "@/features/analytics/services/analytics.service";
 import type { DateRange } from "@/features/analytics/types";
 
 export const analyticsKeys = {
   all: ["analytics"] as const,
+  dashboard: ["analytics", "dashboard"] as const,
   overview: (range: DateRange) => ["analytics", "overview", range] as const,
   aiSummary: (range: DateRange) => ["analytics", "ai", "summary", range] as const,
   aiDaily: (range: DateRange) => ["analytics", "ai", "daily", range] as const,
@@ -45,5 +47,12 @@ export function useCheckinOutcomes(range: DateRange) {
     queryKey: analyticsKeys.checkins(range),
     queryFn: () => getCheckinOutcomes(range),
     placeholderData: keepPreviousData,
+  });
+}
+
+export function useDashboard() {
+  return useQuery({
+    queryKey: analyticsKeys.dashboard,
+    queryFn: getDashboard,
   });
 }

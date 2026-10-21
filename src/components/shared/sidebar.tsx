@@ -24,7 +24,7 @@ import { performLogout } from "@/auth/tokenManager";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const NAV_ITEMS = [
-  { href: "/", label: "Dashboard", icon: LayoutDashboard },
+  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
   { href: "/exercises", label: "Exercises", icon: Dumbbell },
   { href: "/muscles", label: "Muscles", icon: Bone },
   { href: "/programs", label: "Programs", icon: Layers },

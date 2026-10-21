@@ -3,6 +3,7 @@ import type {
   AiDaily,
   AiSummary,
   CheckinOutcomes,
+  Dashboard,
   DateRange,
   Overview,
 } from "@/features/analytics/types";
@@ -25,4 +26,8 @@ export async function getAiDaily(range: DateRange): Promise<AiDaily> {
 
 export async function getCheckinOutcomes(range: DateRange): Promise<CheckinOutcomes> {
   return apiClient.get<CheckinOutcomes>(`/admin/analytics/ai/checkins?${rangeQuery(range)}`);
+}
+
+export async function getDashboard(): Promise<Dashboard> {
+  return apiClient.get<Dashboard>("/admin/analytics/dashboard");
 }
