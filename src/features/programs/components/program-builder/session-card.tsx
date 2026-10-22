@@ -112,7 +112,7 @@ export function SessionCard({ dayIndex, session, canDelete }: Props) {
                   )}
                   {ex.tempo && <span>Tempo {ex.tempo}</span>}
                   {ex.notes && (
-                    <span className="italic line-clamp-1 max-w-xs">"{ex.notes}"</span>
+                    <span className="italic line-clamp-1 max-w-xs">&ldquo;{ex.notes}&rdquo;</span>
                   )}
                 </div>
               </div>

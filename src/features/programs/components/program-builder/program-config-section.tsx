@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { SPLIT_TYPE_LABELS, SESSION_ORDERING_LABELS } from "@/features/programs/types";
+import { SPLIT_TYPE_LABELS, SESSION_ORDERING_LABELS, type DurationType, type SessionOrderingLogic, type SplitType } from "@/features/programs/types";
 
 export function ProgramConfigSection() {
   const { state, dispatch } = useProgramBuilder();
@@ -59,7 +59,7 @@ export function ProgramConfigSection() {
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label>Split Type</Label>
-            <Select value={state.split_type} onValueChange={(v) => dispatch({ type: "SET_SPLIT_TYPE", value: v as any })}>
+            <Select value={state.split_type} onValueChange={(v) => dispatch({ type: "SET_SPLIT_TYPE", value: v as SplitType })}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -73,7 +73,7 @@ export function ProgramConfigSection() {
 
           <div className="flex flex-col gap-1.5">
             <Label>Session Ordering</Label>
-            <Select value={state.session_ordering_logic} onValueChange={(v) => dispatch({ type: "SET_SESSION_ORDERING", value: v as any })}>
+            <Select value={state.session_ordering_logic} onValueChange={(v) => dispatch({ type: "SET_SESSION_ORDERING", value: v as SessionOrderingLogic })}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
@@ -89,7 +89,7 @@ export function ProgramConfigSection() {
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1.5">
             <Label>Duration</Label>
-            <Select value={state.duration_type} onValueChange={(v) => dispatch({ type: "SET_DURATION_TYPE", value: v as any })}>
+            <Select value={state.duration_type} onValueChange={(v) => dispatch({ type: "SET_DURATION_TYPE", value: v as DurationType })}>
               <SelectTrigger className="w-full">
                 <SelectValue />
               </SelectTrigger>
