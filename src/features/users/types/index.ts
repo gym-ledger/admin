@@ -1,4 +1,4 @@
-/** Activity figures, defined in gym-ledger/api/algorithms/user-activity.md. */
+/** Activity figures, as the API defines them (adminAnalytics.repository.ts there). */
 export interface UserActivity {
   created_at: string;
   last_active_at: string | null;

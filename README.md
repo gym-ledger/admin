@@ -4,6 +4,18 @@ The Gym Ledger admin panel: where the people running an instance manage the exer
 
 Part of Gym Ledger, alongside [`gym-ledger/api`](https://github.com/gym-ledger/api) (the API every app talks to) and [`gym-ledger/web`](https://github.com/gym-ledger/web) (the app people train with).
 
+## Screenshots
+
+<p align="center"><img src=".github/assets/demo.gif" width="800" alt="Admin panel tour: dashboard, exercises, program builder, muscles, users and AI usage"></p>
+
+| Dashboard | Program builder |
+|---|---|
+| ![Dashboard: weekly activity, workouts per day and what needs attention](.github/assets/dashboard.png) | ![Program builder: program info, version config and a day's exercises](.github/assets/program-builder.png) |
+| **Exercise editor** | **User detail** |
+| ![Exercise editor](.github/assets/exercise-editor.png) | ![User detail: account, activity, body weight and recent workouts](.github/assets/user-detail.png) |
+
+The data shown belongs to a demo account.
+
 ## Features
 
 - **Dashboard.** This week against last week, workouts per day, what needs attention, the most-used plans and exercises, and recent sign-ups (contact details masked).
