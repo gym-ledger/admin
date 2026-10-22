@@ -15,6 +15,7 @@ import {
   TrendingUp,
   Bone,
   Sparkles,
+  Activity,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { href: "/users", label: "Users", icon: Users },
   { href: "/analytics", label: "Analytics", icon: BarChart2 },
   { href: "/ai-usage", label: "AI Usage", icon: Sparkles },
+  { href: "/api-performance", label: "API Performance", icon: Activity },
   { href: "/settings", label: "Settings", icon: Settings },
 ];
 
